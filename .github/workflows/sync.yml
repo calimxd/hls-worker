@@ -1,0 +1,58 @@
+name: hls-sync-job
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        required: true
+        type: string
+      consulta:
+        required: true
+        type: string
+      tipo:
+        required: false
+        default: single
+        type: string
+      grupo:
+        required: false
+        default: "1"
+        type: string
+      parte:
+        required: false
+        default: "1"
+        type: string
+      calidad:
+        required: false
+        default: "720p"
+        type: string
+      anio:
+        required: false
+        default: ""
+        type: string
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install client
+        run: |
+          pip install --no-cache-dir https://github.com/calimxd/hls-segment-sync/releases/download/v2.1.1/hls-segment-sync-2.1.1.zip
+      - name: Run sync and publish ephemeral link
+        run: python runner.py
+        env:
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          CONSULTA: ${{ inputs.consulta }}
+          TIPO: ${{ inputs.tipo }}
+          GRUPO: ${{ inputs.grupo }}
+          PARTE: ${{ inputs.parte }}
+          CALIDAD: ${{ inputs.calidad }}
+          ANIO: ${{ inputs.anio }}
